@@ -6,6 +6,7 @@ import {
   signInWithPopup,
   User,
   signOut,
+  onAuthStateChanged,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 // import { firestore } from "firebase";
@@ -43,6 +44,21 @@ function App() {
   const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
+    onAuthStateChanged(getAuth(), async (user) => {
+      if (user) {
+        const email = user.email;
+        const name = user.displayName;
+
+        setMe({ email, name });
+      } else {
+        setMe(null);
+        setUser(null);
+        setIsEditing(false);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
     if (!me?.email) return;
 
     const docRef = doc(db, "users", me.email);
@@ -72,36 +88,43 @@ function App() {
     setDoc(doc(db, "users", me.email), { status: user.status });
   };
 
-  const Me = () => {
-    return (
-      <div>
-        <div>You</div>
-        <div>
-          {me.name}: {user?.status}
-        </div>
-        {isEditing ? (
-          <form onSubmit={handleSubmit}>
-            <input
-              type="text"
-              onChange={(e) => {
-                setUser((prev) => ({
-                  ...prev,
-                  status: e.target.value,
-                }));
-              }}
-              value={user.status}
-            />
-            <input type="submit" value="SUBMIT" />
-          </form>
-        ) : (
-          <button onClick={() => setIsEditing(true)}>Edit</button>
-        )}
-      </div>
-    );
-  };
-
   return (
-    <div>{me ? <Me /> : <button onClick={handleLogin}>Login</button>}</div>
+    <div>
+      {me ? (
+        <div>
+          <div>You</div>
+          <div>
+            {me.name}: {user?.status}
+          </div>
+          {isEditing ? (
+            <form onSubmit={handleSubmit}>
+              <input
+                type="text"
+                onChange={(e) => {
+                  setUser((prev) => ({
+                    ...prev,
+                    status: e.target.value,
+                  }));
+                }}
+                value={user.status}
+              />
+              <input type="submit" value="SUBMIT" />
+            </form>
+          ) : (
+            <button onClick={() => setIsEditing(true)}>Edit</button>
+          )}
+          <button
+            onClick={() => {
+              signOut(getAuth());
+            }}
+          >
+            Sign Out
+          </button>
+        </div>
+      ) : (
+        <button onClick={handleLogin}>Login</button>
+      )}
+    </div>
   );
 }
 
