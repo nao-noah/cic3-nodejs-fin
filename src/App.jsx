@@ -17,6 +17,7 @@ import {
   getDocs,
   doc,
   setDoc,
+  addDoc,
   getDoc,
 } from "firebase/firestore";
 // TODO: Add SDKs for Firebase products that you want to use
@@ -37,42 +38,45 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore();
 
 function App() {
-  const [users, setUsers] = useState([]);
+  const [user, setUser] = useState(null);
+  const [me, setMe] = useState(null);
 
   useEffect(() => {
-    console.log("hey");
-    const q = query(collection(db, "users"));
-    getDocs(q).then((snapshot) => {
-      setUsers(snapshot.docs);
-      console.log(snapshot.docs[0].data());
-    });
-  }, []);
+    if (!me?.email) return;
 
-  const handleLogin = async () => {
-    const userCred = await signInWithPopup(getAuth(), new GoogleAuthProvider());
-    const idToken = await userCred.user.getIdToken(true);
+    const docRef = doc(db, "users", me.email);
+    getDoc(docRef).then((docSnap) => {
+      if (!docSnap.exists()) {
+        console.log("this user doc doesn't exist");
+        return;
+      }
+      setUser(docSnap.data());
+    });
+  }, [me?.email]);
+
+  const handleLogin = () => {
+    signInWithPopup(getAuth(), new GoogleAuthProvider()).then((userCred) => {
+      const email = userCred.user.email;
+      const name = userCred.user.displayName;
+
+      setMe({ email, name });
+      setDoc(doc(db, "users", email), { status: "" });
+    });
   };
 
-  const UserList = () => {
-    if (!users) return null;
+  const Me = () => {
     return (
-      <>
-        {users.map((user) => (
-          <div key={user.id}>
-            {user.data().name}: {user.data().status}
-          </div>
-        ))}
-      </>
+      <div>
+        <div>You</div>
+        <div>
+          {me.name}: {user?.status}
+        </div>
+      </div>
     );
   };
 
   return (
-    <div>
-      <button onClick={handleLogin}>Login</button>
-      <div>
-        <UserList />
-      </div>
-    </div>
+    <div>{me ? <Me /> : <button onClick={handleLogin}>Login</button>}</div>
   );
 }
 
