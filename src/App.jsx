@@ -89,12 +89,13 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="AppWrapper">
+      <h1>Shout Your Current Status</h1>
       {me ? (
         <div>
-          <div>You</div>
-          <div>
-            {me.name}: {user?.status}
+          <div className="shouting">
+            My name is {me.name}.<br />
+            I'm shouting <span>{user?.status}</span>!!!
           </div>
           {isEditing ? (
             <form onSubmit={handleSubmit}>
@@ -111,7 +112,9 @@ function App() {
               <input type="submit" value="SUBMIT" />
             </form>
           ) : (
-            <button onClick={() => setIsEditing(true)}>Edit</button>
+            <button className="shoutButton" onClick={() => setIsEditing(true)}>
+              Edit Your Shout
+            </button>
           )}
           <button
             onClick={() => {
@@ -122,7 +125,7 @@ function App() {
           </button>
         </div>
       ) : (
-        <button onClick={handleLogin}>Login</button>
+        <button onClick={handleLogin}>Login to Get Started</button>
       )}
     </div>
   );
