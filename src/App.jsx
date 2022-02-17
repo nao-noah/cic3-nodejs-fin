@@ -68,7 +68,7 @@ function App() {
         return;
       }
       console.log("fine user", docSnap.data());
-      setUser(docSnap.data());
+      setUser({ status: "", ...docSnap.data() });
     });
   }, [me?.email]);
 
@@ -85,7 +85,7 @@ function App() {
   const handleSubmit = (e) => {
     e.preventDefault();
     setIsEditing(false);
-    setDoc(doc(db, "users", me.email), { status: user.status });
+    setDoc(doc(db, "users", me.email), { status: user?.status || "" });
   };
 
   return (
@@ -95,7 +95,7 @@ function App() {
         <div>
           <div className="shouting">
             My name is {me.name}.<br />
-            I'm shouting <span>{user?.status}</span>!!!
+            I'm shouting <span>{user?.status || ""}</span>!!!
           </div>
           {isEditing ? (
             <form onSubmit={handleSubmit}>
@@ -107,7 +107,7 @@ function App() {
                     status: e.target.value,
                   }));
                 }}
-                value={user.status}
+                value={user?.status || ""}
               />
               <input type="submit" value="SUBMIT" />
             </form>
