@@ -1,23 +1,22 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./logo.svg";
+import "./App.css";
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  User,
+  signOut,
+} from "firebase/auth";
 
 function App() {
+  const handleLogin = async () => {
+    const userCred = await signInWithPopup(getAuth(), new GoogleAuthProvider());
+    const idToken = await userCred.user.getIdToken(true);
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <button onClick={handleLogin}>Login</button>
     </div>
   );
 }
