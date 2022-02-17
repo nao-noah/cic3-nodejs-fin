@@ -40,6 +40,7 @@ const db = getFirestore();
 function App() {
   const [user, setUser] = useState(null);
   const [me, setMe] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!me?.email) return;
@@ -50,6 +51,7 @@ function App() {
         console.log("this user doc doesn't exist");
         return;
       }
+      console.log("fine user", docSnap.data());
       setUser(docSnap.data());
     });
   }, [me?.email]);
@@ -60,8 +62,14 @@ function App() {
       const name = userCred.user.displayName;
 
       setMe({ email, name });
-      setDoc(doc(db, "users", email), { status: "" });
+      setDoc(doc(db, "users", email));
     });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setIsEditing(false);
+    setDoc(doc(db, "users", me.email), { status: user.status });
   };
 
   const Me = () => {
@@ -71,6 +79,23 @@ function App() {
         <div>
           {me.name}: {user?.status}
         </div>
+        {isEditing ? (
+          <form onSubmit={handleSubmit}>
+            <input
+              type="text"
+              onChange={(e) => {
+                setUser((prev) => ({
+                  ...prev,
+                  status: e.target.value,
+                }));
+              }}
+              value={user.status}
+            />
+            <input type="submit" value="SUBMIT" />
+          </form>
+        ) : (
+          <button onClick={() => setIsEditing(true)}>Edit</button>
+        )}
       </div>
     );
   };
